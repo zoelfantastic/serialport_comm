@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/zulfi/project/serial/build",
+  "command": "/usr/bin/g++   -g -o CMakeFiles/serial-comm.dir/main.cpp.o -c /home/zulfi/project/serial/main.cpp",
+  "file": "/home/zulfi/project/serial/main.cpp",
+  "output": "CMakeFiles/serial-comm.dir/main.cpp.o"
+}
+]
