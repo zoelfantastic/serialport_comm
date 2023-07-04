@@ -367,7 +367,7 @@ SerialPort::SerialPort()
     baudRateType_ = BaudRateType::STANDARD;
     baudRateStandard_ = defaultBaudRate_;
     readBufferSize_B_ = defaultReadBufferSize_B_;
-    readBuffer_.reserve(readBufferSize_B_);
+    // readBuffer_.reserve(readBufferSize_B_);
     state_ = State::CLOSED;
 }
 
@@ -596,7 +596,7 @@ void SerialPort::Read(std::string &data)
     }
     else if (n > 0)
     {
-        data += std::string(&readBuffer_[0], n);
+        // data += std::string(&readBuffer_[0], n);
     }
 
     // If code reaches here, read must of been successful
@@ -616,7 +616,7 @@ void SerialPort::ReadBinary(std::vector<uint8_t> &data)
     // We provide the underlying raw array from the readBuffer_ vector to this C api.
     // This will work because we do not delete/resize the vector while this method
     // is called
-    ssize_t n = read(fileDesc_, &readBuffer_[0], readBufferSize_B_);
+    ssize_t n = read(fileDesc_, readBuffer_, readBufferSize_B_);
     // Error Handling
     if (n < 0)
     {
@@ -639,37 +639,64 @@ void SerialPort::ReadBinary(std::vector<uint8_t> &data)
 
         bool oneFrame = false;
         int index = 0;
+        bool isIbitBingoMode = false;
 
-        for (int i = 0; i < n; i++)
+        if (readBuffer_[0] == HEADER_EMP)
         {
-            if (readBuffer_[i] == 0 && oneFrame == false)
-            {
-                oneFrame = true;
-                index++;
-            }
-            else if (readBuffer_[i] != 0)
+            for (int i = 1; i <= n; i++)
             {
                 index++;
+                if (readBuffer_[i] == HEADER_ENTER_TEST_MODE || readBuffer_[i] == HEADER_ENTER_BINGO_SET_MODE)
+                {
+                    isIbitBingoMode = true;
+                }
+                else
+                {
+                    if (!isIbitBingoMode)
+                    {
+                        // NORMAL MODE
+                        if (readBuffer_[i] == HEADER_EMP)
+                            break;
+                    }
+                    else
+                    {
+                        // IBIT MODE or BINGO MODE
+                        if (readBuffer_[i] == HEADER_EMP && oneFrame)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            if (readBuffer_[i] == HEADER_EMP)
+                                oneFrame = true;
+                        }
+                    }
+                }
+                // index++;
             }
-            else
-            {
-                break;
-            }
+            memcpy(bufferTemp, readBuffer_, index);
         }
 
-        printf("value of saved bufferTemp : \n ");
-        for (int k = 0; k < n; k++)
-        {
-            printf("%d ", bufferTemp[k]);
-        }
-        printf("\n");
-        // if ( bufferTemp[0] != '\0') {
-        //  memcpy(bufferTemp + sizeof(bufferTemp), &*readBuffer_.begin(), (index+sizeof(bufferTemp)));
-        //}
-        // else {
-        memcpy(bufferTemp, &*readBuffer_.begin(), index);
-        //}
-
+        // printf("value of readBuffer_ : \n ");
+        // for (int i = 0; i < n; i++)
+        // {
+        //     printf("%d ", readBuffer_[i]);
+        //     if (readBuffer_[i] == HEADER_EMP && oneFrame == false)
+        //     {
+        //         oneFrame = true;
+        //         index++;
+        //     }
+        //     else if (readBuffer_[i] != HEADER_EMP)
+        //     {
+        //         index++;
+        //     }
+        //     else
+        //     {
+        //         break;
+        //     }
+        // }
+        // printf("\n");
+        // memcpy(bufferTemp, readBuffer_, index);
         printf("value of index : %d\n ", index);
         printf("value of bufferTemp : \n ");
         for (int k = 0; k < index; k++)
@@ -677,15 +704,9 @@ void SerialPort::ReadBinary(std::vector<uint8_t> &data)
             printf("%d ", bufferTemp[k]);
         }
         printf("\n");
-        // clear buffer
-        memset(bufferTemp, 0, index);
-        memcpy(bufferTemp, &readBuffer_[index], (n - index));
-        // printf("value of bufferTemp : \n ");
-        // for (int k = 0; k < index; k++)
-        // {
-        //     printf("%d ", bufferTemp[k]);
-        // }
-        // printf("\n");
+        // // clear buffer
+        // memset(bufferTemp, NULL, index);
+        // memcpy(bufferTemp, readBuffer_, (n - index));
     }
 
     // If code reaches here, read must of been successful

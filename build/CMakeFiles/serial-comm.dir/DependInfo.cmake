@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/zulfi/project/serial/main.cpp" "CMakeFiles/serial-comm.dir/main.cpp.o" "gcc" "CMakeFiles/serial-comm.dir/main.cpp.o.d"
+  "/home/zulfi/Documents/serial/main.cpp" "CMakeFiles/serial-comm.dir/main.cpp.o" "gcc" "CMakeFiles/serial-comm.dir/main.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

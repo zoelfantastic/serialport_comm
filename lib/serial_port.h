@@ -13,6 +13,35 @@
 #include <string.h>
 #include <iostream>
 
+// Threat Message Header
+const unsigned int HEADER_LOCKED_ON_EMITTER         = 0x49;
+const unsigned int HEADER_PRELOCKED_EMITTER         = 0x4A;
+const unsigned int HEADER_NEXT_MESSAGE              = 0x40;
+
+// Bit Message Header
+const unsigned int HEADER_BIT_STATUS                = 0x4B;
+
+// Library Load Header
+const unsigned int HEADER_LIBRARY_STATUS            = 0x4C;
+
+// EMP Header
+const unsigned int HEADER_EMP                       = 0xFE;
+
+// Normal Mode Message Header
+const unsigned int HEADER_ENGINE_MONITOR_MESSAGE    = 0xF0;
+
+// IBIT Message Header
+const unsigned int HEADER_ENTER_TEST_MODE           = 0xF3;
+const unsigned int HEADER_IBIT_ERROR_CODE           = 0xF5;
+const unsigned int TERMINATOR_EXIT_TEST_MODE        = 0xF6;
+
+// Bingo Set Message Header
+const unsigned int HEADER_ENTER_BINGO_SET_MODE      = 0xF9;
+const unsigned int HEADER_EXIT_BINGO_SET_MODE       = 0xFA;
+
+// Terminator For All
+const unsigned int TERMINATOR                       = 0x80;
+
 enum class BaudRate
 {
     B_0,
@@ -102,9 +131,10 @@ private:
     int fileDesc_;
     bool echo_;
     int32_t timeout_ms_;
-    char bufferTemp[255];
+    uint8_t bufferTemp[255];
 
-    std::vector<char> readBuffer_;
+    // std::vector<char> readBuffer_;
+    uint8_t readBuffer_[255];
     unsigned char readBufferSize_B_;
 
     static constexpr BaudRate defaultBaudRate_ = BaudRate::B_9600;

@@ -63,7 +63,7 @@ int main(int, char **)
     //     // }
     // }
 
-    // Write some binary data and read it back
+    //Write some binary data and read it back
     // std::cout << "Writing binary data..." << std::flush;
     // std::vector<uint8_t> txDataBinary{1, 2, 3, 4, 5};
     // serialPort.WriteBinary(txDataBinary);

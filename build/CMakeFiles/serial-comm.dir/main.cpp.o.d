@@ -1,5 +1,5 @@
 CMakeFiles/serial-comm.dir/main.cpp.o: \
- /home/zulfi/project/serial/main.cpp /usr/include/stdc-predef.h \
+ /home/zulfi/Documents/serial/main.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/13.1.1/iostream \
  /usr/include/c++/13.1.1/bits/requires_hosted.h \
  /usr/include/c++/13.1.1/x86_64-pc-linux-gnu/bits/c++config.h \
@@ -145,8 +145,8 @@ CMakeFiles/serial-comm.dir/main.cpp.o: \
  /usr/include/c++/13.1.1/thread /usr/include/c++/13.1.1/bits/std_thread.h \
  /usr/include/c++/13.1.1/bits/unique_ptr.h \
  /usr/include/c++/13.1.1/bits/this_thread_sleep.h \
- /home/zulfi/project/serial/lib/serial_port.cpp \
- /home/zulfi/project/serial/lib/serial_port.h \
+ /home/zulfi/Documents/serial/lib/serial_port.cpp \
+ /home/zulfi/Documents/serial/lib/serial_port.h \
  /usr/include/c++/13.1.1/vector \
  /usr/include/c++/13.1.1/bits/stl_uninitialized.h \
  /usr/include/c++/13.1.1/bits/stl_vector.h \
@@ -167,4 +167,4 @@ CMakeFiles/serial-comm.dir/main.cpp.o: \
  /usr/include/asm-generic/ioctl.h /usr/include/bits/ioctl-types.h \
  /usr/include/sys/ttydefaults.h /usr/include/c++/13.1.1/cassert \
  /usr/include/assert.h /usr/include/string.h /usr/include/strings.h \
- /home/zulfi/project/serial/lib/exception.h
+ /home/zulfi/Documents/serial/lib/exception.h

@@ -301,8 +301,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/zulfi/project/serial/build",
-		"source" : "/home/zulfi/project/serial"
+		"build" : "/home/zulfi/Documents/serial/build",
+		"source" : "/home/zulfi/Documents/serial"
 	},
 	"version" : 
 	{

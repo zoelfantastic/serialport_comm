@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/zulfi/project/serial
+CMAKE_SOURCE_DIR = /home/zulfi/Documents/serial
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/zulfi/project/serial/build
+CMAKE_BINARY_DIR = /home/zulfi/Documents/serial/build
 
 # Utility rule file for ExperimentalMemCheck.
 
@@ -82,6 +82,6 @@ CMakeFiles/ExperimentalMemCheck.dir/clean:
 .PHONY : CMakeFiles/ExperimentalMemCheck.dir/clean
 
 CMakeFiles/ExperimentalMemCheck.dir/depend:
-	cd /home/zulfi/project/serial/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/zulfi/project/serial /home/zulfi/project/serial /home/zulfi/project/serial/build /home/zulfi/project/serial/build /home/zulfi/project/serial/build/CMakeFiles/ExperimentalMemCheck.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/zulfi/Documents/serial/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/zulfi/Documents/serial /home/zulfi/Documents/serial /home/zulfi/Documents/serial/build /home/zulfi/Documents/serial/build /home/zulfi/Documents/serial/build/CMakeFiles/ExperimentalMemCheck.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ExperimentalMemCheck.dir/depend
 

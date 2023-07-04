@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/zulfi/project/serial
+CMAKE_SOURCE_DIR = /home/zulfi/Documents/serial
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/zulfi/project/serial/build
+CMAKE_BINARY_DIR = /home/zulfi/Documents/serial/build
 
 # Utility rule file for ExperimentalTest.
 
@@ -82,6 +82,6 @@ CMakeFiles/ExperimentalTest.dir/clean:
 .PHONY : CMakeFiles/ExperimentalTest.dir/clean
 
 CMakeFiles/ExperimentalTest.dir/depend:
-	cd /home/zulfi/project/serial/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/zulfi/project/serial /home/zulfi/project/serial /home/zulfi/project/serial/build /home/zulfi/project/serial/build /home/zulfi/project/serial/build/CMakeFiles/ExperimentalTest.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/zulfi/Documents/serial/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/zulfi/Documents/serial /home/zulfi/Documents/serial /home/zulfi/Documents/serial/build /home/zulfi/Documents/serial/build /home/zulfi/Documents/serial/build/CMakeFiles/ExperimentalTest.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ExperimentalTest.dir/depend
 
