@@ -12,6 +12,7 @@
 #include <cassert>
 #include <string.h>
 #include <iostream>
+#include <algorithm>
 
 // Threat Message Header
 const unsigned int HEADER_LOCKED_ON_EMITTER         = 0x49;
@@ -131,11 +132,13 @@ private:
     int fileDesc_;
     bool echo_;
     int32_t timeout_ms_;
-    uint8_t bufferTemp[255];
-
-    // std::vector<char> readBuffer_;
+    //uint8_t bufferTemp[255];
+    std::vector<uint8_t> bufferTemp;
+    std::vector<uint8_t> parsedData;
+    //std::vector<char> readBuffer_;
     uint8_t readBuffer_[255];
-    unsigned char readBufferSize_B_;
+    uint8_t data[255];
+    uint8_t readBufferSize_B_;
 
     static constexpr BaudRate defaultBaudRate_ = BaudRate::B_9600;
     static constexpr int32_t defaultTimeout_ms_ = -1;

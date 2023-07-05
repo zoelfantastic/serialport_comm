@@ -22,7 +22,7 @@ const double RX_TIMEOUT_MS = 2000;
 
 int main(int, char **)
 {
-    SerialPort serialPort("/dev/ttyUSB0", BaudRate::B_9600, NumDataBits::EIGHT, Parity::NONE, NumStopBits::ONE);
+    SerialPort serialPort("/dev/tnt1", BaudRate::B_9600, NumDataBits::EIGHT, Parity::NONE, NumStopBits::ONE);
 
     // Block for at most 100ms when receiving data
     // NOTE: I haven't had luck setting this to -1, Read() seems to never return
