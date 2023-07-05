@@ -1,8 +1,8 @@
 [
 {
-  "directory": "/home/zulfi/Documents/serial/build",
-  "command": "/usr/bin/g++   -g -o CMakeFiles/serial-comm.dir/main.cpp.o -c /home/zulfi/Documents/serial/main.cpp",
-  "file": "/home/zulfi/Documents/serial/main.cpp",
+  "directory": "/home/zfi/tes_project/serialport_comm/build",
+  "command": "/usr/bin/g++ -g -o CMakeFiles/serial-comm.dir/main.cpp.o -c /home/zfi/tes_project/serialport_comm/main.cpp",
+  "file": "/home/zfi/tes_project/serialport_comm/main.cpp",
   "output": "CMakeFiles/serial-comm.dir/main.cpp.o"
 }
 ]
