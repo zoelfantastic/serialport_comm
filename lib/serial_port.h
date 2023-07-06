@@ -132,14 +132,14 @@ private:
     int fileDesc_;
     bool echo_;
     int32_t timeout_ms_;
-    //uint8_t bufferTemp[255];
-    std::vector<uint8_t> bufferTemp;
+    uint8_t bufferTemp[255];
+    //std::vector<char> bufferTemp;
     std::vector<uint8_t> parsedData;
     //std::vector<char> readBuffer_;
-    uint8_t readBuffer_[255];
+    uint8_t readBuffer_[32];
     uint8_t data[255];
     uint8_t readBufferSize_B_;
-    uint8_t *header, *terminator, *endOfBuffer;
+    uint8_t *header, *terminator, *endOfData;
     
 
     static constexpr BaudRate defaultBaudRate_ = BaudRate::B_9600;

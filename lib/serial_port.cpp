@@ -367,11 +367,12 @@ SerialPort::SerialPort()
     baudRateType_ = BaudRateType::STANDARD;
     baudRateStandard_ = defaultBaudRate_;
     readBufferSize_B_ = defaultReadBufferSize_B_;
-    bufferTemp.reserve(readBufferSize_B_);
+    // bufferTemp.reserve(1);
     parsedData.reserve(readBufferSize_B_);
 
     header = NULL;
     terminator = NULL;
+    endOfData = NULL;
     state_ = State::CLOSED;
 }
 
@@ -640,75 +641,80 @@ void SerialPort::ReadBinary(std::vector<uint8_t> &data)
     }
     else if (n > 0)
     {
-
-        std::vector<uint8_t> v;
-
         uint8_t *data;
 
-        v.assign(readBuffer_, readBuffer_ + n);
+         printf("value of old bufferTemp : \n ");
+         for (auto &element : readBuffer_)
+         {
+             printf("%d ", element);
+         }
+         printf("\n");
 
-        // append data into buffer
-        // int s = bufferTemp.size();
-        // auto it = bufferTemp.end() - (bufferTemp.end() - s);
-        uint8_t offside = bufferTemp.size() - (terminator -header);
-        printf("length of old bufferTemp : %d\n ", offside);
-        bufferTemp.insert(bufferTemp.end(), v.begin(), v.end());
-        printf("value of old bufferTemp : \n ");
-        for (auto &element : bufferTemp)
-        {
-            printf("%d ", element);
-        }
-        printf("\n");
-        // get parsed data
-        for (uint8_t &element : bufferTemp)
-        {
-            if (element == HEADER_EMP && !header)
-            {
-                header = &element;
-            }
-            else if (element == TERMINATOR)
-            {
-                terminator = &element;
-                break;
-            }
-        }
-        if (header)
-        {
-            uint8_t start = header - &bufferTemp[0];
-            uint8_t countData = (terminator - header);
-            uint8_t zulfi = bufferTemp.size() - (offside + countData+1);
-            // data = new uint8_t[countData*sizeof(uint8_t)];
-            data = (uint8_t *)malloc(countData * sizeof(uint8_t));
-            // assert(data);
-            memcpy(data, &bufferTemp[start], countData);
-            printf("value of parsed Data : %d\n ", countData);
-            for (int i = 0; i < countData; i++)
-            {
-                printf("%d ", data[i]);
-            }
+        // // append data into buffer
+        // if (endOfData)
+        // {
+        //     // endOfData++;
+        //     int z = (endOfData + 1) - bufferTemp;
+        //     memcpy(&bufferTemp[z], readBuffer_, n);
+        //     endOfData += n;
+        // }
+        // else
+        // {
+        //     memcpy(bufferTemp, readBuffer_, n);
+        //     endOfData = &bufferTemp[n - 1];
+        // }
 
-            printf("\n");
+        // printf("length of data : %d\n ", );
+        //  printf("value of old bufferTemp : \n ");
+        //  for (auto &element : bufferTemp)
+        //  {
+        //      printf("%d ", element);
+        //  }
+        //  printf("\n");
 
-            // restructure buffer for the next data
-            // header = terminator + 1;
-            // memcpy(&bufferTemp[0], bufferTemp)
-            //uint8_t next_data = header;//(terminator + 1) - header;
-            //uint8_t lengthData = (bufferTemp.size() - (next_data));
-            // printf("header position %d\n ", *(header + 2));
-            // printf("count next data %d\n ", bufferTemp.at(next_data));
-            // printf("lengthData %d\n ", lengthData);
-            //printf("nextData %d\n ", next_data);
-            memcpy(&bufferTemp[0], &bufferTemp[zulfi], (bufferTemp.size()));
-            header = NULL;
-            terminator = NULL;
-            printf("value of new bufferTemp : \n ");
-            for (auto &element : bufferTemp)
-            {
-                printf("%d ", element);
-            }
+        //  get parsed data
+        // for (uint8_t &element : bufferTemp)
+        // {
+        //     if (element == HEADER_EMP && !header)
+        //     {
+        //         header = &element;
+        //     }
+        //     else if (element == TERMINATOR && header)
+        //     {
+        //         terminator = &element;
+        //         break;
+        //     }
+        // }
+        // if (header)
+        // {
+        //     uint8_t start = header - &bufferTemp[0];
+        //     uint8_t countData = (terminator - header);
+        //     // data = (uint8_t *)malloc(countData * sizeof(uint8_t));
+        //     data = new uint8_t[countData];
+        //     memcpy(data, &bufferTemp[start], countData);
 
-            printf("\n");
-        }
+        //     // process parsing data
+        //     //  printf("value of parsed Data : %d\n ", countData);
+        //     //  for (int i = 0; i < countData; i++)
+        //     //  {
+        //     //      printf("%d ", data[i]);
+        //     //  }
+        //     //  printf("\n");
+
+        //     // free memory
+        //     delete[] data;
+
+        //     // restucture buffer temp
+        //     memcpy(&bufferTemp[0], terminator + 1, countData);
+        //     header = NULL;
+        //     terminator = NULL;
+        //     // printf("value of new bufferTemp : \n ");
+        //     // for (auto &element : bufferTemp)
+        //     // {
+        //     //     printf("%d ", element);
+        //     // }
+        //     // printf("\n");
+        // }
     }
 
     // If code reaches here, read must of been successful
