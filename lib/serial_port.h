@@ -139,6 +139,8 @@ private:
     uint8_t readBuffer_[255];
     uint8_t data[255];
     uint8_t readBufferSize_B_;
+    uint8_t *header, *terminator, *endOfBuffer;
+    
 
     static constexpr BaudRate defaultBaudRate_ = BaudRate::B_9600;
     static constexpr int32_t defaultTimeout_ms_ = -1;
