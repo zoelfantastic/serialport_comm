@@ -13,6 +13,7 @@
 #include <string.h>
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 
 // Threat Message Header
 const unsigned int HEADER_LOCKED_ON_EMITTER         = 0x49;
@@ -132,18 +133,17 @@ private:
     int fileDesc_;
     bool echo_;
     int32_t timeout_ms_;
-    uint8_t bufferTemp[255];
-    //std::vector<char> bufferTemp;
-    std::vector<uint8_t> parsedData;
-    //std::vector<char> readBuffer_;
+    const int MAX_SIZE = 256;
+    uint8_t bufferTemp[256]; //buffer to receive data
+    uint8_t arraySize = 0;
+
     uint8_t readBuffer_[32];
-    uint8_t data[255];
     uint8_t readBufferSize_B_;
     uint8_t *header, *terminator, *endOfData;
     
 
-    static constexpr BaudRate defaultBaudRate_ = BaudRate::B_9600;
-    static constexpr int32_t defaultTimeout_ms_ = -1;
+    static constexpr BaudRate defaultBaudRate_ = BaudRate::B_115200;
+    static constexpr int32_t defaultTimeout_ms_ = 0;
     static constexpr unsigned char defaultReadBufferSize_B_ = 255;
 
 public:
