@@ -369,6 +369,8 @@ SerialPort::SerialPort()
     readBufferSize_B_ = defaultReadBufferSize_B_;
     int arraySize = 0;
 
+    currMessageState = NO_MESSAGE_HEADER;
+
     header = NULL;
     terminator = NULL;
     endOfData = NULL;
@@ -640,9 +642,6 @@ void SerialPort::ReadBinary(std::vector<uint8_t> &data)
     }
     else if (n > 0)
     {
-        // Get starting timepoint
-        auto timeStart = std::chrono::high_resolution_clock::now();
-
         if (arraySize >= MAX_SIZE)
         {
             // buffer full
@@ -650,122 +649,147 @@ void SerialPort::ReadBinary(std::vector<uint8_t> &data)
         }
         else
         {
-            /** ADD INTO BUFFER */
+           
             memcpy(&bufferTemp[arraySize], readBuffer_, n);
             arraySize += n;
+            // printf("array size init: %d\n", arraySize);;
+            // printf("===BUFFER DATA===\n");
+            // printf("%d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d -%d\n",
+            //        bufferTemp[0], bufferTemp[1], bufferTemp[2], bufferTemp[3], bufferTemp[4], bufferTemp[5],
+            //        bufferTemp[6], bufferTemp[7], bufferTemp[8], bufferTemp[9], bufferTemp[10], bufferTemp[11],
+            //        bufferTemp[12], bufferTemp[13], bufferTemp[14], bufferTemp[15], bufferTemp[16], bufferTemp[17],
+            //        bufferTemp[18], bufferTemp[19], bufferTemp[20]);
 
-            /** GET HEADER AND TAIL */
-            for (auto &element : bufferTemp)
+            for (int i = 0; i < arraySize; i++)
             {
-                if (element == HEADER_EMP && header == nullptr)
+                switch (currMessageState)
                 {
-                    header = &element;
+                case NO_MESSAGE_HEADER:
+                {
+                    if (bufferTemp[i] == HEADER_EMP)
+                    {
+                        header = &bufferTemp[i];
+                        currMessageState = MESSAGE_HEADER_FOUND;
+                    }
+                    break;
                 }
-                else if (element == TERMINATOR && header != nullptr)
+                case MESSAGE_HEADER_FOUND:
                 {
-                    terminator = &element;
+                    if (bufferTemp[i] == HEADER_ENGINE_MONITOR_MESSAGE)
+                    {
+                        if ((header - &bufferTemp[0]) + 1 == i)
+                        {
+                            currMessageState = NORMAL_MODE_MESSAGE_ID_FOUND;
+                        }
+                        else
+                        {
+                            currMessageState = NO_MESSAGE_HEADER;
+                            header = NULL;
+                        }
+                    }
+                    else if (bufferTemp[i] == HEADER_ENTER_TEST_MODE)
+                    {
+                        if ((header - &bufferTemp[0]) + 1 == i)
+                        {
+                            currMessageState = IBIT_MODE_MESSAGE_ID_FOUND;
+                        }
+                        else
+                        {
+                            currMessageState = NO_MESSAGE_HEADER;
+                            header = NULL;
+                        }
+                    }
+                    else if (bufferTemp[i] == HEADER_ENTER_BINGO_SET_MODE)
+                    {
+                        if ((header - &bufferTemp[0]) + 1 == i)
+                        {
+                            currMessageState = BINGO_MODE_MESSAGE_ID_FOUND;
+                        }
+                        else
+                        {
+                            currMessageState = NO_MESSAGE_HEADER;
+                            header = NULL;
+                        }
+                    }
+                    break;
+                }
+                case NORMAL_MODE_MESSAGE_ID_FOUND:
+                {
+                    // todo change state to ready after get completed one frame data/
+                    uint8_t lengthFromHeader = (i - (header - &bufferTemp[0])) + 1;
+                    // printf("lengthfromheader: %d\n", lengthFromHeader);
+                    // printf("i: %d\n", i);
+                    if ((lengthFromHeader) == sizeOfNormalMode())
+                    {
+                        // printf("length: %d\n", (header - &bufferTemp[0]));
+                        dataParsed = new uint8_t[sizeOfNormalMode()];
+                        memcpy(dataParsed, &bufferTemp[header - &bufferTemp[0]], sizeOfNormalMode());
+                        currMessageState = MESSAGE_READY_PASSED;
+                    }
+                    else if (lengthFromHeader > sizeOfNormalMode())
+                    {
+                        currMessageState = NO_MESSAGE_HEADER;
+                        header = NULL;
+                    }
+                    break;
+                }
+                case IBIT_MODE_MESSAGE_ID_FOUND:
+                {
+                    if (bufferTemp[i] == TERMINATOR_EXIT_TEST_MODE)
+                    {
+                        uint8_t lengthIbitData = i - (header - &bufferTemp[0]);
+                        dataParsed = new uint8_t[lengthIbitData];
+                        memcpy(dataParsed, &bufferTemp[header - &bufferTemp[0]], lengthIbitData);
+                        currMessageState = MESSAGE_READY_PASSED;
+                    }
+                    break;
+                }
+                case BINGO_MODE_MESSAGE_ID_FOUND:
+                {
+                    uint8_t lengthFromHeaderBingo = i - (header - &bufferTemp[0]);
+                    if (lengthFromHeaderBingo == sizeOfBingoMode())
+                    {
+                        dataParsed = new uint8_t[sizeOfBingoMode()];
+                        memcpy(dataParsed, &bufferTemp[header - &bufferTemp[0]], sizeOfBingoMode());
+                        currMessageState = MESSAGE_READY_PASSED;
+                    }
+                    else if (lengthFromHeaderBingo > sizeOfBingoMode())
+                    {
+                        currMessageState = NO_MESSAGE_HEADER;
+                        header = NULL;
+                    }
+                    break;
+                    break;
+                }
+                case MESSAGE_READY_PASSED:
+                {
+                    // todo process emp parser and set state to initial values/
+                    this->processData(dataParsed);
+                    // free memory
+                    delete[] dataParsed;
+                    // restucture buffer temp
+                    uint8_t indexHeader = (header - &bufferTemp[0]);
+                    uint8_t indexNext = indexHeader + sizeOfNormalMode();
+                    memcpy(&bufferTemp[0], &bufferTemp[indexNext], indexNext);
+
+                    // printf("===BUFFER DATA AFTER===\n");
+                    // printf("%d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d -%d\n",
+                    //        bufferTemp[0], bufferTemp[1], bufferTemp[2], bufferTemp[3], bufferTemp[4], bufferTemp[5],
+                    //        bufferTemp[6], bufferTemp[7], bufferTemp[8], bufferTemp[9], bufferTemp[10], bufferTemp[11],
+                    //        bufferTemp[12], bufferTemp[13], bufferTemp[14], bufferTemp[15], bufferTemp[16], bufferTemp[17],
+                    //        bufferTemp[18], bufferTemp[19], bufferTemp[20]);
+
+                    arraySize -= (indexNext);
+                    //printf("arraysize after: %d\n", arraySize);
+                    header = NULL;
+                    currMessageState = NO_MESSAGE_HEADER;
+                    break;
+                }
+                default:
                     break;
                 }
             }
-
-            if (header != nullptr & terminator != nullptr)
-            {
-
-                uint8_t *dataParsed;
-                uint8_t start = header - &bufferTemp[0];
-                dataParsed = new uint8_t[(terminator - header)];
-                memcpy(dataParsed, &bufferTemp[start], (terminator - header));
-                /** PROCESS PARSED DATA*/
-
-                // free memory
-                delete[] dataParsed;
-
-                // restucture buffer temp
-                memcpy(&bufferTemp[0], terminator + 1, (terminator - header));
-                header = NULL;
-                terminator = NULL;
-                auto timeStop = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(timeStop - timeStart);
-                std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
-            }
-                }
-
-        // uint8_t *data;
-
-        //  printf("value of data : \n ");
-        //  for (auto& element : readBuffer_)
-        //  {
-        //      printf("%d ", element);
-        //  }
-        //  printf("\n");
-
-        // // append data into buffer
-        // if (endOfData)
-        // {
-        //     // endOfData++;
-        //     int z = (endOfData + 1) - bufferTemp;
-        //     memcpy(&bufferTemp[z], readBuffer_, n);
-        //     endOfData += n;
-        // }
-        // else
-        // {
-        //     memcpy(bufferTemp, readBuffer_, n);
-        //     endOfData = &bufferTemp[n - 1];
-        // }
-
-        // printf("length of data : %d\n ", n);
-        //   printf("value of old bufferTemp : \n ");
-        //   for (auto &element : bufferTemp)
-        //   {
-        //       printf("%d ", element);
-        //   }
-        //   printf("\n");
-
-        //  get parsed data
-        // for (uint8_t &element : bufferTemp)
-        // {
-        //     if (element == HEADER_EMP && header == nullptr)
-        //     {
-        //         header = &element;
-        //         printf("value header %p\n", header);
-        //     }
-        //     else if (element == TERMINATOR && header != nullptr)
-        //     {
-        //         terminator = &element;
-        //         printf("value terminator %p\n", terminator);
-        //         break;
-        //     }
-        // }
-        // if (header != nullptr & terminator != nullptr)
-        // {
-
-        //     uint8_t start = header - &bufferTemp[0];
-        //     uint8_t countData = (terminator - header);
-        //     data = new uint8_t[countData];
-        //     memcpy(data, &bufferTemp[start], countData);
-
-        //     // process parsing data
-        //     printf("value of parsed Data : %d\n ", countData);
-        //     // for (int i = 0; i < countData; i++)
-        //     // {
-        //     //     printf("%d ", data[i]);
-        //     // }
-        //     // printf("\n");
-
-        //     // free memory
-        //     delete[] data;
-
-        //     // restucture buffer temp
-        //     memcpy(&bufferTemp[0], terminator + 1, countData);
-        //     header = NULL;
-        //     terminator = NULL;
-        //     // printf("value of new bufferTemp : \n ");
-        //     // for (auto &element : bufferTemp)
-        //     // {
-        //     //     printf("%d ", element);
-        //     // }
-        //     // printf("\n");
-        // }
+        }
     }
 
     // If code reaches here, read must of been successful
@@ -783,4 +807,39 @@ int32_t SerialPort::Available()
 State SerialPort::GetState()
 {
     return state_;
+}
+
+void SerialPort::processData(uint8_t *data)
+{
+    if (data[0] == HEADER_EMP && data[1] == HEADER_ENGINE_MONITOR_MESSAGE)
+    {
+        // normalModeMessage.tl_tm = ((data[3] << 8) + data[2]) * 0.1f;
+        // normalModeMessage.ul_um = ((data[5] << 8) + data[4]) * 0.1f;
+        // normalModeMessage.vl_vm = (data[7] << 8) + data[6];
+        // normalModeMessage.ww = data[8];
+        // normalModeMessage.yy = data[9] * 10;
+        // normalModeMessage.zz = data[10] * 10;
+        // normalModeMessage.ql_qm = ((data[12] << 8) + data[11]) * 10;
+        // normalModeMessage.rr = data[13];
+        // normalModeMessage.sl_sm = (data[15] << 8) + data[14];
+        // normalModeMessage.fcl_fcm = (data[17] << 8) + data[16];
+        printf("===PARSED DATA===\n");
+        printf("%d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d - %d\n",
+               data[0], data[1], data[2], data[3], data[4], data[5],
+               data[6], data[7], data[8], data[9], data[10], data[11],
+               data[12], data[13], data[14], data[15], data[16], data[17],
+               data[18], data[19], data[20]);
+
+        // printf(":: NORMAL MODE MESSAGE ::\n");
+        // printf("  TL_TM    : 0x%02X 0x%02X\n", data[3], data[2]);
+        // printf("  UL_UM    : 0x%02X 0x%02X\n", data[5], data[4]);
+        // printf("  VL_VM    : 0x%02X 0x%02X\n", data[7], data[6]);
+        // printf("  WW       : 0x%02X      \n", data[8]);
+        // printf("  YY       : 0x%02X      \n", data[9]);
+        // printf("  ZZ       : 0x%02X      \n", data[10]);
+        // printf("  QL_QM    : 0x%02X 0x%02X\n", data[12], data[11]);
+        // printf("  RR       : 0x%02X      \n", data[13]);
+        // printf("  SL_SM    : 0x%02X 0x%02X \n", data[15], data[14]);
+        // printf("  FCL_FCM  : 0x%02X 0x%02X \n", data[17], data[16]);
+    }
 }

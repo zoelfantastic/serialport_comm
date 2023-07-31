@@ -1,0 +1,61 @@
+void EmpUartHandler::TaskUpdateOn1000HZ(void *params) {
+  if(params == NULL)
+    return;
+  EmpUartHandler *_this = (EmpUartHandler*)params;
+  uint8_t data[_this->max_uart_buffer];
+
+  int len = _this->uart.Read(data, _this->max_uart_buffer);
+  if(len > 0) {   // Parse received data from serial EMP
+    //printf("%d data received\n", len);
+    //_this->emp_parser.ParseEmp(data);
+
+    if (_this->bufferSize >= 255) {
+      //buffer full
+      printf("buffer full\n");
+    } else {
+      memcpy(&(_this->intBuffer[_this->bufferSize]), data, len);
+      _this->bufferSize += len;
+
+      for (uint8_t &element : _this->intBuffer)
+      {
+          if (_this->header == nullptr) {
+            if (element == HEADER_EMP) { _this->header = &element; }
+          } else {
+            if (_this->terminator == nullptr) {
+                if (element == HEADER_ENGINE_MONITOR_MESSAGE) {  
+                    if (_this->bufferSize >= 18) { 
+                      _this->terminator = _this->header + 17; 
+                      break; }
+                }
+                else if ( element == TERMINATOR_EXIT_TEST_MODE ) {_this->terminator = &element; break;}
+                else if (element == HEADER_ENTER_BINGO_SET_MODE)
+                {
+                  if (_this->bufferSize >= 6) { _this->terminator = _this->header + 5; break; }
+                }
+            }
+          }
+      }
+
+      if (_this->header != nullptr && _this->terminator != nullptr)
+      {
+          uint8_t start = _this->header - &_this->intBuffer[0];
+          uint8_t countData = (_this->terminator - _this->header) + 1;
+          _this->parsedData = new uint8_t[countData];
+          memcpy(_this->parsedData, &_this->intBuffer[start], countData);
+
+          // process parsing data
+          _this->emp_parser.ParseEmp(_this->parsedData);
+
+          // free memory
+          delete[] _this->parsedData;
+
+          // restucture buffer temp
+          memcpy(&_this->intBuffer[0], _this->terminator + 1, sizeof(_this->intBuffer) - countData);
+          _this->bufferSize -= countData;
+
+          _this->header = NULL;
+          _this->terminator = NULL;
+      }
+    }
+  } 
+}

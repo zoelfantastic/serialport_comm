@@ -44,6 +44,15 @@ const unsigned int HEADER_EXIT_BINGO_SET_MODE       = 0xFA;
 // Terminator For All
 const unsigned int TERMINATOR                       = 0x80;
 
+enum state {
+    NO_MESSAGE_HEADER,
+    MESSAGE_HEADER_FOUND,
+    NORMAL_MODE_MESSAGE_ID_FOUND,
+    IBIT_MODE_MESSAGE_ID_FOUND,
+    BINGO_MODE_MESSAGE_ID_FOUND,
+    MESSAGE_READY_PASSED
+};
+
 enum class BaudRate
 {
     B_0,
@@ -141,6 +150,10 @@ private:
     uint8_t readBufferSize_B_;
     uint8_t *header, *terminator, *endOfData;
     
+    state currMessageState;
+    uint8_t *dataParsed;
+    constexpr int sizeOfNormalMode()  {return 18;}
+    constexpr int sizeOfBingoMode() {return 6;}
 
     static constexpr BaudRate defaultBaudRate_ = BaudRate::B_115200;
     static constexpr int32_t defaultTimeout_ms_ = 0;
@@ -169,6 +182,7 @@ public:
     void ReadBinary(std::vector<uint8_t> &data);
     int32_t Available();
     State GetState();
+    void processData(uint8_t *dataParsed);
 };
 
 #endif
